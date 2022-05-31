@@ -10,7 +10,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
 
 mlflow.set_tracking_uri("http://127.0.0.1:5000")
-mlflow.set_experiment("random-forest-hyperopt2")
+mlflow.set_experiment("random-forest-hyperopt3")
 
 
 def load_pickle(filename):
@@ -29,7 +29,8 @@ def run(data_path, num_trials):
         with mlflow.start_run():
             mlflow.set_tag("developer", "Chandra") 
             mlflow.set_tag("model", "rf_Search") 
-
+            
+#             print("..params .. ",params)
 
             rf = RandomForestRegressor(**params)
             rf.fit(X_train, y_train)
@@ -43,7 +44,7 @@ def run(data_path, num_trials):
             mlflow.log_param("train-data-path", "./week2_data/green_tripdata_2021-01.parquet")
             mlflow.log_param("valid-data-path", "./week2_data/green_tripdata_2021-02.parquet")
             mlflow.log_metric('validation_rmse',rmse)
-
+            mlflow.log_params(params)
             mlflow.sklearn.log_model(rf, artifact_path="models_rf")    
             mlflow.log_artifact(local_path="models/rf_reg.bin", artifact_path="models_pickle")
             return {'loss': rmse, 'status': STATUS_OK}

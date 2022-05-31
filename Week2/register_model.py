@@ -10,7 +10,7 @@ from mlflow.tracking import MlflowClient
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
 
-HPO_EXPERIMENT_NAME = "random-forest-hyperopt2"
+HPO_EXPERIMENT_NAME = "random-forest-hyperopt3"
 EXPERIMENT_NAME = "random-forest-best-models"
 
 mlflow.set_tracking_uri("http://127.0.0.1:5000")
@@ -35,7 +35,7 @@ def train_and_log_model(data_path, params):
     X_train, y_train = load_pickle(os.path.join(data_path, "train.pkl"))
     X_valid, y_valid = load_pickle(os.path.join(data_path, "valid.pkl"))
     X_test, y_test = load_pickle(os.path.join(data_path, "test.pkl"))
-
+    print("params .. ",params)
     with mlflow.start_run():
 #         mlflow.log_param("parameters", SPACE)
 #         mlflow.log_param("par", params)
@@ -74,9 +74,13 @@ def run(data_path, log_top):
                 run_view_type = ViewType.ACTIVE_ONLY,
                 order_by=["metrics.test_rmse ASC" ]
                     )[0]
-    
+    print("best_run... ", best_run.info.run_id)
     # register the best model
-    mlflow.register_model(best_run, "best_model")
+    
+    run_id =  best_run.info.run_id
+    model_uri = f"runs:/{run_id}/models"
+    
+    mlflow.register_model(model_uri, "best_model")
     # mlflow.register_model( ... )
 
 
@@ -90,7 +94,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         "--top_n",
-        default=5,
+        default=2,
         type=int,
         help="the top 'top_n' models will be evaluated to decide which model to promote."
     )
